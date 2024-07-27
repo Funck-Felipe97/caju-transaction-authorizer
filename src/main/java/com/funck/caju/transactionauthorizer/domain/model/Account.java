@@ -1,17 +1,16 @@
 package com.funck.caju.transactionauthorizer.domain.model;
 
 import com.funck.caju.transactionauthorizer.domain.exceptions.NotEnoughBalanceException;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigInteger;
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
+
+import static com.funck.caju.transactionauthorizer.domain.model.BalanceType.CASH;
 
 @Entity
 @Data
@@ -25,51 +24,67 @@ public class Account {
     @Positive
     private BigInteger totalBalance;
 
-    @OneToMany(mappedBy = "account")
-    private Set<Balance> balances;
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
+    private List<Balance> balances;
 
     public boolean hasEnoughBalanceByTypeWithCash(final BigInteger totalAmount, final BalanceType balanceType) {
         final var balanceByType = balances.stream()
-                .filter(balance -> balance.getBalanceType().equals(balanceType))
+                .filter(balance -> balance.getBalanceType().equals(balanceType) || CASH.equals(balance.getBalanceType()))
                 .map(Balance::getTotalBalance)
                 .reduce(BigInteger.ZERO, BigInteger::add);
 
         return balanceByType.compareTo(totalAmount) >= 0;
     }
 
-    public Balance getBalanceByType(final BalanceType balanceType) {
+    public Optional<Balance> getBalanceForMccCategory(final String mcc) {
+        final var balanceType = BalanceType.getBalanceTypeByMcc(mcc);
+
+        final var balanceForMccCategory = getBalanceByType(balanceType);
+
+        if (balanceForMccCategory.isPresent() || CASH.equals(balanceType))
+            return balanceForMccCategory;
+        else
+            return getCashBalance();
+    }
+
+    public Optional<Balance> getCashBalance() {
+        return getBalanceByType(CASH);
+    }
+
+    public Optional<Balance> getBalanceByType(final BalanceType balanceType) {
         return balances.stream()
                 .filter(balance -> balance.getBalanceType().equals(balanceType))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 
     public void subtractBalanceFrom(final BigInteger totalAmount, final Balance balance) {
-        if (totalAmount.compareTo(totalBalance) > 0) {
-            throw new NotEnoughBalanceException(
-                    String.format("Account balance not enough, totalAmount: %s, totalBalance: %s", totalAmount, totalBalance)
-            );
-        }
-
+        validateSufficientBalance(totalAmount);
         totalBalance = totalBalance.subtract(totalAmount);
-
         balance.subtract(totalAmount);
     }
 
     public void subtractBalanceFrom(final BigInteger totalAmount, final Balance balance, final Balance cashBalance) {
-        final BigInteger debitFromBalance;
-        final BigInteger debitFromCash;
-
-        if (totalAmount.compareTo(balance.getTotalBalance()) >= 0) {
-            debitFromBalance = balance.getTotalBalance();
-            debitFromCash = totalAmount.subtract(balance.getTotalBalance());
-        } else {
-            debitFromBalance = totalAmount;
-            debitFromCash = BigInteger.ZERO;
-        }
+        final var debitFromBalance = totalAmount.min(balance.getTotalBalance());
+        final var debitFromCash = totalAmount.subtract(debitFromBalance);
 
         subtractBalanceFrom(debitFromBalance, balance);
         subtractBalanceFrom(debitFromCash, cashBalance);
     }
 
+    private void validateSufficientBalance(BigInteger totalAmount) {
+        if (totalAmount.compareTo(totalBalance) > 0) {
+            throw new NotEnoughBalanceException(String.format(
+                    "Account balance not enough, totalAmount: %s, totalBalance: %s",
+                    totalAmount, totalBalance));
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", totalBalance=" + totalBalance +
+                ", balances=" + balances.size() +
+                '}';
+    }
 }

@@ -6,6 +6,7 @@ import com.funck.caju.transactionauthorizer.domain.repository.AccountRepository;
 import com.funck.caju.transactionauthorizer.domain.services.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -17,11 +18,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional(readOnly = true)
     public Account getAccountById(Integer id) {
-        return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException(String.format("Account not found: %d", id)));
+        return accountRepository.findByIdWithBalances(id).orElseThrow(() -> new AccountNotFoundException(String.format("Account not found: %d", id)));
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     public Account save(Account account) {
         return accountRepository.save(account);
     }

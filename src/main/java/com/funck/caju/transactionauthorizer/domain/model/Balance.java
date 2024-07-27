@@ -1,16 +1,7 @@
 package com.funck.caju.transactionauthorizer.domain.model;
 
 import com.funck.caju.transactionauthorizer.domain.exceptions.NotEnoughBalanceException;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigInteger;
@@ -25,7 +16,7 @@ public class Balance {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", insertable = false, updatable = false)
+    @JoinColumn(name = "account_id", foreignKey = @ForeignKey(name = "account_id_fk"))
     private Account account;
 
     @Enumerated(EnumType.STRING)
@@ -45,5 +36,15 @@ public class Balance {
 
     public boolean hasEnoughBalance(final BigInteger totalAmount) {
         return totalBalance.compareTo(totalAmount) >= 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Balance{" +
+                "id=" + id +
+                ", account=" + account +
+                ", balanceType=" + balanceType +
+                ", totalBalance=" + totalBalance +
+                '}';
     }
 }

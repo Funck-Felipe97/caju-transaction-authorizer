@@ -1,5 +1,6 @@
 package com.funck.caju.transactionauthorizer.usecases.impl;
 
+import com.funck.caju.transactionauthorizer.domain.exceptions.NotEnoughBalanceException;
 import com.funck.caju.transactionauthorizer.domain.model.Account;
 import com.funck.caju.transactionauthorizer.domain.model.Balance;
 import com.funck.caju.transactionauthorizer.domain.model.BalanceType;
@@ -12,6 +13,7 @@ import com.funck.caju.transactionauthorizer.usecases.model.TransactionResponse;
 import com.funck.caju.transactionauthorizer.usecases.model.TransactionResponseType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 
@@ -24,12 +26,12 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
     private final BalanceService balanceService;
 
     @Override
+    @Transactional
     public TransactionResponse execute(final TransactionRequest transactionRequest) {
         final String mcc = getMcc(transactionRequest);
-        final BalanceType balanceType = BalanceType.getBalanceTypeByMcc(mcc);
         final var account = accountService.getAccountById(transactionRequest.account());
 
-        if (processTransaction(account, balanceType, transactionRequest.totalAmount())) {
+        if (processTransaction(account, mcc, transactionRequest.totalAmount())) {
             return new TransactionResponse(TransactionResponseType.APPROVED);
         }
 
@@ -42,16 +44,26 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
                 .orElse(transactionRequest.mcc());
     }
 
-    private boolean processTransaction(Account account, BalanceType balanceType, BigInteger transactionTotalAmount) {
-        final var balanceToBeDebited = account.getBalanceByType(balanceType);
+    private boolean processTransaction(Account account, String mcc, BigInteger transactionTotalAmount) {
+        final var availableBalanceForMccCategoryOptional = account.getBalanceForMccCategory(mcc);
 
-        if (balanceToBeDebited.hasEnoughBalance(transactionTotalAmount)) {
-            processApprovedTransaction(account, balanceToBeDebited, transactionTotalAmount);
+        if (availableBalanceForMccCategoryOptional.isEmpty()) {
+            return false;
+        }
+
+        final var availableBalanceForMccCategory = availableBalanceForMccCategoryOptional.get();
+
+        if (availableBalanceForMccCategory.hasEnoughBalance(transactionTotalAmount)) {
+            processApprovedTransaction(account, availableBalanceForMccCategory, transactionTotalAmount);
             return true;
         }
 
-        if (!BalanceType.CASH.equals(balanceType) && account.hasEnoughBalanceByTypeWithCash(transactionTotalAmount, balanceType)) {
-            processApprovedTransactionWithCash(account, balanceToBeDebited, transactionTotalAmount);
+        if (BalanceType.CASH.equals(availableBalanceForMccCategory.getBalanceType())) {
+            return false;
+        }
+
+        if (account.hasEnoughBalanceByTypeWithCash(transactionTotalAmount, availableBalanceForMccCategory.getBalanceType())) {
+            processApprovedTransactionWithCash(account, availableBalanceForMccCategory, transactionTotalAmount);
             return true;
         }
 
@@ -64,7 +76,9 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
     }
 
     private void processApprovedTransactionWithCash(Account account, Balance balanceToBeDebited, BigInteger transactionTotalAmount) {
-        final var cashBalance = account.getBalanceByType(BalanceType.CASH);
+        final var cashBalance = account.getCashBalance()
+                .orElseThrow(() -> new NotEnoughBalanceException("Cash balance not found"));
+
         account.subtractBalanceFrom(transactionTotalAmount, balanceToBeDebited, cashBalance);
         saveAccountAndBalances(account, balanceToBeDebited, cashBalance);
     }

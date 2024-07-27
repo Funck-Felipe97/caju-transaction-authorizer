@@ -19,7 +19,7 @@ public class TestController {
 
     @GetMapping
     public String get() {
-        accountRepository.findAll().forEach(System.out::println);
+        System.out.println(accountRepository.findByIdWithBalances(1).get());
         balanceRepository.findAll().forEach(System.out::println);
         transactionRepository.findAll().forEach(System.out::println);
 
