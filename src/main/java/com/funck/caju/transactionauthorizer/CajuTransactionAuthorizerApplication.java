@@ -1,4 +1,4 @@
-package com.funck.caju_transaction_authorizer;
+package com.funck.caju.transactionauthorizer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

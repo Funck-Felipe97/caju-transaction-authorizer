@@ -1,4 +1,4 @@
-package com.funck.caju_transaction_authorizer;
+package com.funck.caju.transactionauthorizer;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
