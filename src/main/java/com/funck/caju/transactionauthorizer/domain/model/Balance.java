@@ -43,7 +43,7 @@ public class Balance {
         totalBalance = totalBalance.subtract(totalAmount);
     }
 
-    public boolean hasEnoughBalanceByType(final BigInteger totalAmount) {
+    public boolean hasEnoughBalance(final BigInteger totalAmount) {
         return totalBalance.compareTo(totalAmount) >= 0;
     }
 }

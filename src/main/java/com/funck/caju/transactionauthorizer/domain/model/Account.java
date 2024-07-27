@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -26,7 +26,7 @@ public class Account {
     private BigInteger totalBalance;
 
     @OneToMany(mappedBy = "account")
-    private List<Balance> balances;
+    private Set<Balance> balances;
 
     public boolean hasEnoughBalanceByTypeWithCash(final BigInteger totalAmount, final BalanceType balanceType) {
         final var balanceByType = balances.stream()
