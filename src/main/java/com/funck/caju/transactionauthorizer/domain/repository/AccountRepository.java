@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     @Query("SELECT a FROM Account a LEFT JOIN FETCH a.balances WHERE a.id = :id")
-    Optional<Account> findByIdWithBalances(@Param("id") Integer id);
+    Optional<Account> findByIdWithBalances(@Param("id") Long id);
 
 }

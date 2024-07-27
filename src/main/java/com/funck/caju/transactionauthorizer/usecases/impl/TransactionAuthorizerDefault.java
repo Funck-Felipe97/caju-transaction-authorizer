@@ -7,9 +7,10 @@ import com.funck.caju.transactionauthorizer.domain.model.BalanceType;
 import com.funck.caju.transactionauthorizer.domain.services.AccountService;
 import com.funck.caju.transactionauthorizer.domain.services.BalanceService;
 import com.funck.caju.transactionauthorizer.domain.services.MerchantService;
+import com.funck.caju.transactionauthorizer.domain.services.TransactionService;
 import com.funck.caju.transactionauthorizer.usecases.TransactionAuthorizerUseCase;
-import com.funck.caju.transactionauthorizer.usecases.model.TransactionRequest;
-import com.funck.caju.transactionauthorizer.usecases.model.TransactionResponse;
+import com.funck.caju.transactionauthorizer.usecases.model.ValidateTransactionCommand;
+import com.funck.caju.transactionauthorizer.usecases.model.TransactionResult;
 import com.funck.caju.transactionauthorizer.usecases.model.TransactionResponseType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,24 +25,27 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
     private final MerchantService merchantService;
     private final AccountService accountService;
     private final BalanceService balanceService;
+    private final TransactionService transactionService;
 
     @Override
     @Transactional
-    public TransactionResponse execute(final TransactionRequest transactionRequest) {
-        final String mcc = getMcc(transactionRequest);
-        final var account = accountService.getAccountById(transactionRequest.account());
+    public TransactionResult execute(final ValidateTransactionCommand validateTransactionCommand) {
+        final String mcc = getMcc(validateTransactionCommand);
+        final var account = accountService.getAccountById(validateTransactionCommand.account());
 
-        if (processTransaction(account, mcc, transactionRequest.totalAmount())) {
-            return new TransactionResponse(TransactionResponseType.APPROVED);
+        if (processTransaction(account, mcc, validateTransactionCommand.totalAmount())) {
+            final var transaction = transactionService.save(validateTransactionCommand.toTransactionDomain());
+
+            return new TransactionResult(TransactionResponseType.APPROVED, transaction);
         }
 
-        return new TransactionResponse(TransactionResponseType.REJECTED);
+        return new TransactionResult(TransactionResponseType.REJECTED);
     }
 
-    private String getMcc(TransactionRequest transactionRequest) {
+    private String getMcc(ValidateTransactionCommand validateTransactionCommand) {
         return merchantService
-                .getMccByMerchantName(transactionRequest.merchant())
-                .orElse(transactionRequest.mcc());
+                .getMccByMerchantName(validateTransactionCommand.merchant())
+                .orElse(validateTransactionCommand.mcc());
     }
 
     private boolean processTransaction(Account account, String mcc, BigInteger transactionTotalAmount) {
@@ -72,6 +76,7 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
 
     private void processApprovedTransaction(Account account, Balance balanceToBeDebited, BigInteger transactionTotalAmount) {
         account.subtractBalanceFrom(transactionTotalAmount, balanceToBeDebited);
+
         saveAccountAndBalances(account, balanceToBeDebited);
     }
 
@@ -80,11 +85,13 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
                 .orElseThrow(() -> new NotEnoughBalanceException("Cash balance not found"));
 
         account.subtractBalanceFrom(transactionTotalAmount, balanceToBeDebited, cashBalance);
+
         saveAccountAndBalances(account, balanceToBeDebited, cashBalance);
     }
 
     private void saveAccountAndBalances(Account account, Balance... balances) {
         accountService.save(account);
+
         for (var balance : balances) {
             balanceService.save(balance);
         }

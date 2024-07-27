@@ -1,12 +1,18 @@
 package com.funck.caju.transactionauthorizer.domain.model;
 
 import com.funck.caju.transactionauthorizer.domain.exceptions.NotEnoughBalanceException;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +31,7 @@ public class Account {
     private BigInteger totalBalance;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
-    private List<Balance> balances;
+    private List<Balance> balances = new ArrayList<>();
 
     public boolean hasEnoughBalanceByTypeWithCash(final BigInteger totalAmount, final BalanceType balanceType) {
         final var balanceByType = balances.stream()

@@ -1,10 +1,12 @@
 package com.funck.caju.transactionauthorizer.usecases.model;
 
 
-public record TransactionResponse(String code) {
+import com.funck.caju.transactionauthorizer.domain.model.Transaction;
 
-    public TransactionResponse(TransactionResponseType transactionResponseType) {
-        this(transactionResponseType.getCode());
+public record TransactionResult(TransactionResponseType transactionResponseType, Transaction transaction) {
+
+    public TransactionResult(TransactionResponseType transactionResponseType) {
+        this(transactionResponseType, null);
     }
 
 }
