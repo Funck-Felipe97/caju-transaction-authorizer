@@ -11,6 +11,11 @@ create table if not exists account_balance (
     constraint account_id_fk foreign key (account_id) references account(id)
 );
 
+create table if not exists merchant (
+    id serial not null primary key,
+    mcc varchar not null,
+    name varchar not null
+);
 
 create table if not exists account_transaction (
 	id serial not null primary key,
@@ -20,10 +25,4 @@ create table if not exists account_transaction (
 	account_id integer not null,
 	created_at timestamp not null,
 	constraint account_transaction_account_id_fk foreign key (account_id) references account(id)
-);
-
-create table if not exists merchant (
-    id serial not null primary key,
-    mcc varchar not null,
-    name varchar not null
 );
