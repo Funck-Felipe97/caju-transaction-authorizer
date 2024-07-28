@@ -31,7 +31,7 @@ public class TransactionAuthorizerLockProxy implements TransactionAuthorizerUseC
     public TransactionResult execute(final ValidateTransactionCommand validateTransactionCommand) {
         log.info("Getting account lock to authorize transaction {}", validateTransactionCommand.account());
 
-        final var lock = lockRegistry.obtain(validateTransactionCommand.account().toString());
+        final var lock = lockRegistry.obtain(validateTransactionCommand.account());
 
         try {
             final var lockAcquired = lock.tryLock(100, TimeUnit.MILLISECONDS);

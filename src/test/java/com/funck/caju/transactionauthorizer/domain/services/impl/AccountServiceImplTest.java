@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,8 +32,8 @@ class AccountServiceImplTest {
     @BeforeEach
     void setUp() {
         account = Account.builder()
-                .id(1L)
-                .totalBalance(BigInteger.valueOf(1000))
+                .id("1")
+                .totalBalance(BigDecimal.valueOf(1000))
                 .build();
 
         openMocks(this);
@@ -43,33 +43,33 @@ class AccountServiceImplTest {
     @DisplayName("Should found account by id")
     void testGetAccountById() {
         // a
-        doReturn(Optional.of(account)).when(accountRepository).findByIdWithBalances(1L);
+        doReturn(Optional.of(account)).when(accountRepository).findByIdWithBalances("1");
 
         // a
-        final var savedAccount = accountService.getAccountById(1L);
+        final var savedAccount = accountService.getAccountById("1");
 
         // a
         assertNotNull(savedAccount);
         assertEquals(account.getId(), savedAccount.getId());
         assertEquals(account.getTotalBalance(), savedAccount.getTotalBalance());
-        verify(accountRepository, times(1)).findByIdWithBalances(1L);
+        verify(accountRepository, times(1)).findByIdWithBalances("1");
     }
 
     @Test
     @DisplayName("Should return empty option when account not exists")
     void testGetAccountByIdWhenAccountNotExists() {
         // a
-        doReturn(Optional.empty()).when(accountRepository).findByIdWithBalances(1L);
+        doReturn(Optional.empty()).when(accountRepository).findByIdWithBalances("1");
 
         // a
         final var exception = assertThrows(
                 AccountNotFoundException.class,
-                () -> accountService.getAccountById(1L)
+                () -> accountService.getAccountById("1")
         );
 
         // a
         assertEquals("Account not found with id: 1", exception.getMessage());
-        verify(accountRepository, times(1)).findByIdWithBalances(1L);
+        verify(accountRepository, times(1)).findByIdWithBalances("1");
     }
 
     @Test

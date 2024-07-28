@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 @Slf4j
 @Service
@@ -55,7 +55,7 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
                 .orElse(validateTransactionCommand.mcc());
     }
 
-    private boolean processTransaction(Account account, String mcc, BigInteger transactionTotalAmount) {
+    private boolean processTransaction(Account account, String mcc, BigDecimal transactionTotalAmount) {
         final var availableBalanceForMccCategoryOptional = account.getBalanceForMccCategory(mcc);
 
         if (availableBalanceForMccCategoryOptional.isEmpty()) {

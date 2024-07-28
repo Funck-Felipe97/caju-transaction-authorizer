@@ -19,13 +19,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public Account getAccountById(Long id) {
+    public Account getAccountById(String id) {
         log.info("Finding account by id: {}", id);
 
         return accountRepository.findByIdWithBalances(id).orElseThrow(() -> {
             log.error("Account not found with id: {}", id);
 
-            return new AccountNotFoundException(String.format("Account not found with id: %d", id));
+            return new AccountNotFoundException(String.format("Account not found with id: %s", id));
         });
     }
 

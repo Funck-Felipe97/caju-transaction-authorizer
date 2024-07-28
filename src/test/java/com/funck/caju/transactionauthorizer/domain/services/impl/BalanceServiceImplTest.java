@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,13 +34,13 @@ class BalanceServiceImplTest {
     @BeforeEach
     void setUp() {
         final var account = Account.builder()
-                .id(1L)
-                .totalBalance(BigInteger.valueOf(1000))
+                .id("1")
+                .totalBalance(BigDecimal.valueOf(1000))
                 .build();
 
         balance = Balance.builder()
                 .id(1L)
-                .totalBalance(BigInteger.valueOf(1000))
+                .totalBalance(BigDecimal.valueOf(1000))
                 .account(account)
                 .balanceType(BalanceType.CASH)
                 .build();

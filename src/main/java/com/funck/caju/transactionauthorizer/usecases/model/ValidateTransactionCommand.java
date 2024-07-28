@@ -3,9 +3,9 @@ package com.funck.caju.transactionauthorizer.usecases.model;
 import com.funck.caju.transactionauthorizer.domain.model.Account;
 import com.funck.caju.transactionauthorizer.domain.model.Transaction;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
-public record ValidateTransactionCommand(Long account, BigInteger totalAmount, String mcc, String merchant) {
+public record ValidateTransactionCommand(String account, BigDecimal totalAmount, String mcc, String merchant) {
 
     public Transaction toTransactionDomain() {
         final var transaction = new Transaction();

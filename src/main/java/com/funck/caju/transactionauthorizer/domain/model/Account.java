@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,21 +31,20 @@ import static com.funck.caju.transactionauthorizer.domain.model.BalanceType.CASH
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @NotNull
     @Positive
-    private BigInteger totalBalance;
+    private BigDecimal totalBalance;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<Balance> balances = new ArrayList<>();
 
-    public boolean hasEnoughBalance(final BigInteger totalAmount, final BalanceType balanceType) {
+    public boolean hasEnoughBalance(final BigDecimal totalAmount, final BalanceType balanceType) {
         final var balanceByType = balances.stream()
                 .filter(balance -> balance.getBalanceType().equals(balanceType) || CASH.equals(balance.getBalanceType()))
                 .map(Balance::getTotalBalance)
-                .reduce(BigInteger.ZERO, BigInteger::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return balanceByType.compareTo(totalAmount) >= 0;
     }
@@ -71,13 +70,13 @@ public class Account {
                 .findFirst();
     }
 
-    public void subtractBalanceFrom(final BigInteger totalAmount, final Balance balance) {
+    public void subtractBalanceFrom(final BigDecimal totalAmount, final Balance balance) {
         validateSufficientBalance(totalAmount);
         totalBalance = totalBalance.subtract(totalAmount);
         balance.subtract(totalAmount);
     }
 
-    public void subtractBalanceFrom(final BigInteger totalAmount, final Balance balance, final Balance cashBalance) {
+    public void subtractBalanceFrom(final BigDecimal totalAmount, final Balance balance, final Balance cashBalance) {
         final var debitFromBalance = totalAmount.min(balance.getTotalBalance());
         final var debitFromCash = totalAmount.subtract(debitFromBalance);
 
@@ -85,7 +84,7 @@ public class Account {
         subtractBalanceFrom(debitFromCash, cashBalance);
     }
 
-    private void validateSufficientBalance(BigInteger totalAmount) {
+    private void validateSufficientBalance(BigDecimal totalAmount) {
         if (totalAmount.compareTo(totalBalance) > 0) {
             throw new NotEnoughBalanceException(String.format(
                     "Account balance not enough, totalAmount: %s, totalBalance: %s",

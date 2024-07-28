@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.integration.support.locks.LockRegistry;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -43,7 +43,7 @@ class TransactionAuthorizerLockProxyTest {
         openMocks(this);
 
         validateTransactionCommand = new ValidateTransactionCommand(
-                1234L, BigInteger.valueOf(100), "5411", "PADARIA DO ZE               SAO PAULO BR"
+                "1234", BigDecimal.valueOf(100), "5411", "PADARIA DO ZE               SAO PAULO BR"
         );
     }
 
@@ -53,7 +53,7 @@ class TransactionAuthorizerLockProxyTest {
     void testExecuteTransactionWhenLockAcquired() {
         // a
         final var lockMock = mock(Lock.class);
-        final var lockKey = validateTransactionCommand.account().toString();
+        final var lockKey = validateTransactionCommand.account();
         final var transactionResultMock = mock(TransactionResult.class);
 
         doReturn(lockMock).when(lockRegistry).obtain(lockKey);
@@ -79,7 +79,7 @@ class TransactionAuthorizerLockProxyTest {
     void testNotExecuteTransactionWhenLockNotAcquired() {
         // a
         final var lockMock = mock(Lock.class);
-        final var lockKey = validateTransactionCommand.account().toString();
+        final var lockKey = validateTransactionCommand.account();
 
         doReturn(lockMock).when(lockRegistry).obtain(lockKey);
         doReturn(false).when(lockMock).tryLock(100, TimeUnit.MILLISECONDS);

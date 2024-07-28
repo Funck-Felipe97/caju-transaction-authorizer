@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 @Builder
 @ToString
@@ -42,9 +42,9 @@ public class Balance {
     @Enumerated(EnumType.STRING)
     private BalanceType balanceType;
 
-    private BigInteger totalBalance;
+    private BigDecimal totalBalance;
 
-    public void subtract(final BigInteger totalAmount) {
+    public void subtract(final BigDecimal totalAmount) {
         if (!hasEnoughBalance(totalAmount)) {
             throw new NotEnoughBalanceException(
                     String.format("Account balance not enough for this category, totalAmount: %s, totalBalance: %s", totalAmount, totalBalance)
@@ -54,7 +54,7 @@ public class Balance {
         totalBalance = totalBalance.subtract(totalAmount);
     }
 
-    public boolean hasEnoughBalance(final BigInteger totalAmount) {
+    public boolean hasEnoughBalance(final BigDecimal totalAmount) {
         return totalBalance.compareTo(totalAmount) >= 0;
     }
 

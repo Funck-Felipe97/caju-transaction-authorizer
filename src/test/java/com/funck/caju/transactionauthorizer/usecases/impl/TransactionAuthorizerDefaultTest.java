@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,24 +59,24 @@ class TransactionAuthorizerDefaultTest {
         cashBalance = Balance.builder()
                 .balanceType(BalanceType.CASH)
                 .id(1234L)
-                .totalBalance(BigInteger.valueOf(300))
+                .totalBalance(BigDecimal.valueOf(300))
                 .build();
 
         mealBalance = Balance.builder()
                 .balanceType(BalanceType.MEAL)
                 .id(1235L)
-                .totalBalance(BigInteger.valueOf(200))
+                .totalBalance(BigDecimal.valueOf(200))
                 .build();
 
         foodBalance = Balance.builder()
                 .balanceType(BalanceType.FOOD)
                 .id(1236L)
-                .totalBalance(BigInteger.valueOf(500))
+                .totalBalance(BigDecimal.valueOf(500))
                 .build();
 
         account = Account.builder()
-                .id(1234L)
-                .totalBalance(BigInteger.valueOf(1000))
+                .id("1234")
+                .totalBalance(BigDecimal.valueOf(1000))
                 .balances(List.of(cashBalance, foodBalance, mealBalance))
                 .build();
 
@@ -84,7 +84,7 @@ class TransactionAuthorizerDefaultTest {
         mealBalance.setAccount(account);
         cashBalance.setAccount(account);
 
-        doReturn(account).when(accountService).getAccountById(1234L);
+        doReturn(account).when(accountService).getAccountById("1234");
         doReturn(Optional.of("5411")).when(merchantService).getMccByMerchantName("PADARIA DO ZE               SAO PAULO BR");
     }
 
@@ -103,7 +103,7 @@ class TransactionAuthorizerDefaultTest {
         account.setBalances(List.of(mealBalance));
 
         validateTransactionCommand = new ValidateTransactionCommand(
-                1234L, BigInteger.valueOf(100), "5411", "PADARIA DO ZE               SAO PAULO BR"
+                "1234", BigDecimal.valueOf(100), "5411", "PADARIA DO ZE               SAO PAULO BR"
         );
 
         // a
@@ -112,7 +112,7 @@ class TransactionAuthorizerDefaultTest {
         // a
         assertEquals(TransactionResponseType.REJECTED, transactionResult.transactionResponseType());
 
-        verify(accountService, times(1)).getAccountById(1234L);
+        verify(accountService, times(1)).getAccountById("1234");
         verifyNoMoreInteractions(balanceService, accountService, transactionService);
     }
 
@@ -129,7 +129,7 @@ class TransactionAuthorizerDefaultTest {
 
         // a
         validateTransactionCommand = new ValidateTransactionCommand(
-                1234L, BigInteger.valueOf(801), "5411", "PADARIA DO ZE               SAO PAULO BR"
+                "1234", BigDecimal.valueOf(801), "5411", "PADARIA DO ZE               SAO PAULO BR"
         );
 
         // a
@@ -138,7 +138,7 @@ class TransactionAuthorizerDefaultTest {
         // a
         assertEquals(TransactionResponseType.REJECTED, transactionResult.transactionResponseType());
 
-        verify(accountService, times(1)).getAccountById(1234L);
+        verify(accountService, times(1)).getAccountById("1234");
         verifyNoMoreInteractions(balanceService, accountService, transactionService);
     }
 
@@ -155,7 +155,7 @@ class TransactionAuthorizerDefaultTest {
 
         // a
         validateTransactionCommand = new ValidateTransactionCommand(
-                1234L, BigInteger.valueOf(500), "5411", "PADARIA DO ZE               SAO PAULO BR"
+                "1234", BigDecimal.valueOf(500), "5411", "PADARIA DO ZE               SAO PAULO BR"
         );
 
         // a
@@ -165,7 +165,7 @@ class TransactionAuthorizerDefaultTest {
         assertEquals(TransactionResponseType.APPROVED, transactionResult.transactionResponseType());
 
         verify(accountService, times(1)).save(account);
-        verify(accountService, times(1)).getAccountById(1234L);
+        verify(accountService, times(1)).getAccountById("1234");
         verify(balanceService, times(1)).save(foodBalance);
         verify(transactionService, times(1)).save(any(Transaction.class));
         verifyNoMoreInteractions(balanceService, accountService, transactionService);
@@ -184,7 +184,7 @@ class TransactionAuthorizerDefaultTest {
 
         // a
         validateTransactionCommand = new ValidateTransactionCommand(
-                1234L, BigInteger.valueOf(799), "5411", "PADARIA DO ZE               SAO PAULO BR"
+                "1234", BigDecimal.valueOf(799), "5411", "PADARIA DO ZE               SAO PAULO BR"
         );
 
         // a
@@ -194,7 +194,7 @@ class TransactionAuthorizerDefaultTest {
         assertEquals(TransactionResponseType.APPROVED, transactionResult.transactionResponseType());
 
         verify(accountService, times(1)).save(account);
-        verify(accountService, times(1)).getAccountById(1234L);
+        verify(accountService, times(1)).getAccountById("1234");
         verify(balanceService, times(1)).save(cashBalance);
         verify(balanceService, times(1)).save(foodBalance);
         verify(transactionService, times(1)).save(any(Transaction.class));

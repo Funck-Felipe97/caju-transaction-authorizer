@@ -19,7 +19,7 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -67,7 +67,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(1L,  BigInteger.valueOf(100), "5811", "1234");
+        final var command = new ValidateTransactionCommand("1",  BigDecimal.valueOf(100), "5811", "1234");
         final var response = new TransactionResponse(TransactionResponseType.APPROVED.getCode());
 
         // a a
@@ -91,7 +91,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(1L,  BigInteger.valueOf(499), "5811", "1234");
+        final var command = new ValidateTransactionCommand("1",  BigDecimal.valueOf(499), "5811", "1234");
         final var response = new TransactionResponse(TransactionResponseType.APPROVED.getCode());
 
         // a a
@@ -115,7 +115,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(1L,  BigInteger.valueOf(300), "5555", "1234");
+        final var command = new ValidateTransactionCommand("1",  BigDecimal.valueOf(300), "5555", "1234");
         final var response = new TransactionResponse(TransactionResponseType.APPROVED.getCode());
 
         // a a
@@ -139,7 +139,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(1L, BigInteger.valueOf(501), "5811", "1234");
+        final var command = new ValidateTransactionCommand("1", BigDecimal.valueOf(501), "5811", "1234");
         final var response = new TransactionResponse(TransactionResponseType.REJECTED.getCode());
 
         // a a
@@ -163,7 +163,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(1L, BigInteger.valueOf(301), "5555", "1234");
+        final var command = new ValidateTransactionCommand("1", BigDecimal.valueOf(301), "5555", "1234");
         final var response = new TransactionResponse(TransactionResponseType.REJECTED.getCode());
 
         // a a
@@ -187,7 +187,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(1L, BigInteger.valueOf(-1), "5555", "1234");
+        final var command = new ValidateTransactionCommand("1", BigDecimal.valueOf(-1), "5555", "1234");
         final var response = new TransactionResponse(TransactionResponseType.GENERIC_ERROR.getCode());
 
         // a a
@@ -211,7 +211,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(null, BigInteger.valueOf(100), "5555", "1234");
+        final var command = new ValidateTransactionCommand(null, BigDecimal.valueOf(100), "5555", "1234");
         final var response = new TransactionResponse(TransactionResponseType.GENERIC_ERROR.getCode());
 
         // a a
@@ -235,7 +235,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(1L, BigInteger.valueOf(100), "  ", "1234");
+        final var command = new ValidateTransactionCommand("1", BigDecimal.valueOf(100), "  ", "1234");
         final var response = new TransactionResponse(TransactionResponseType.GENERIC_ERROR.getCode());
 
         // a a
@@ -259,7 +259,7 @@ public class TransactionControllerTest {
          */
 
         // a
-        final var command = new ValidateTransactionCommand(1L, BigInteger.valueOf(100), "5555", "   ");
+        final var command = new ValidateTransactionCommand("1", BigDecimal.valueOf(100), "5555", "   ");
         final var response = new TransactionResponse(TransactionResponseType.GENERIC_ERROR.getCode());
 
         // a a

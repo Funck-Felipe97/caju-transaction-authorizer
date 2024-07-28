@@ -5,10 +5,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AccountTest {
 
@@ -22,24 +25,24 @@ class AccountTest {
         cashBalance = Balance.builder()
                 .balanceType(BalanceType.CASH)
                 .id(1234L)
-                .totalBalance(BigInteger.valueOf(300))
+                .totalBalance(BigDecimal.valueOf(300))
                 .build();
 
         mealBalance = Balance.builder()
                 .balanceType(BalanceType.MEAL)
                 .id(1235L)
-                .totalBalance(BigInteger.valueOf(200))
+                .totalBalance(BigDecimal.valueOf(200))
                 .build();
 
         foodBalance = Balance.builder()
                 .balanceType(BalanceType.FOOD)
                 .id(1236L)
-                .totalBalance(BigInteger.valueOf(500))
+                .totalBalance(BigDecimal.valueOf(500))
                 .build();
 
         account = Account.builder()
-                .id(1234L)
-                .totalBalance(BigInteger.valueOf(1000))
+                .id("1234")
+                .totalBalance(BigDecimal.valueOf(1000))
                 .balances(List.of(cashBalance, foodBalance, mealBalance))
                 .build();
 
@@ -81,26 +84,26 @@ class AccountTest {
     @DisplayName("Should subtract balance from balance category")
     void testSubtractBalanceFromBalanceCategory() {
         // a a
-        account.subtractBalanceFrom(new BigInteger("70"), mealBalance);
+        account.subtractBalanceFrom(new BigDecimal("70"), mealBalance);
 
         // a
-        assertEquals(new BigInteger("130"), mealBalance.getTotalBalance());
-        assertEquals(new BigInteger("300"), cashBalance.getTotalBalance());
-        assertEquals(new BigInteger("500"), foodBalance.getTotalBalance());
-        assertEquals(new BigInteger("930"), account.getTotalBalance());
+        assertEquals(new BigDecimal("130"), mealBalance.getTotalBalance());
+        assertEquals(new BigDecimal("300"), cashBalance.getTotalBalance());
+        assertEquals(new BigDecimal("500"), foodBalance.getTotalBalance());
+        assertEquals(new BigDecimal("930"), account.getTotalBalance());
     }
 
     @Test
     @DisplayName("Should subtract balance from balance category and cash when category balance is not enough")
     void testSubtractBalanceFromBalanceCategoryAndCash() {
         // a a
-        account.subtractBalanceFrom(new BigInteger("230"), mealBalance, cashBalance);
+        account.subtractBalanceFrom(new BigDecimal("230"), mealBalance, cashBalance);
 
         // a
-        assertEquals(new BigInteger("0"), mealBalance.getTotalBalance());
-        assertEquals(new BigInteger("270"), cashBalance.getTotalBalance());
-        assertEquals(new BigInteger("500"), foodBalance.getTotalBalance());
-        assertEquals(new BigInteger("770"), account.getTotalBalance());
+        assertEquals(new BigDecimal("0"), mealBalance.getTotalBalance());
+        assertEquals(new BigDecimal("270"), cashBalance.getTotalBalance());
+        assertEquals(new BigDecimal("500"), foodBalance.getTotalBalance());
+        assertEquals(new BigDecimal("770"), account.getTotalBalance());
     }
 
     @Test
@@ -109,7 +112,7 @@ class AccountTest {
         // a a a
         final var notEnoughBalanceException = assertThrows(
                 NotEnoughBalanceException.class,
-                () -> account.subtractBalanceFrom(new BigInteger("1100"), mealBalance)
+                () -> account.subtractBalanceFrom(new BigDecimal("1100"), mealBalance)
         );
 
         assertEquals("Account balance not enough, totalAmount: 1100, totalBalance: 1000", notEnoughBalanceException.getMessage());
@@ -121,7 +124,7 @@ class AccountTest {
         // a a a
         final var notEnoughBalanceException = assertThrows(
                 NotEnoughBalanceException.class,
-                () -> account.subtractBalanceFrom(new BigInteger("501"), mealBalance, cashBalance)
+                () -> account.subtractBalanceFrom(new BigDecimal("501"), mealBalance, cashBalance)
         );
 
         assertEquals("Account balance not enough for this category, totalAmount: 301, totalBalance: 300", notEnoughBalanceException.getMessage());
@@ -130,13 +133,13 @@ class AccountTest {
     @Test
     @DisplayName("should return true if account has enough balance for transaction amount")
     void testHasEnoughBalance() {
-        assertTrue(account.hasEnoughBalance(new BigInteger("300"), BalanceType.CASH));
-        assertTrue(account.hasEnoughBalance(new BigInteger("500"), BalanceType.MEAL));
-        assertTrue(account.hasEnoughBalance(new BigInteger("800"), BalanceType.FOOD));
+        assertTrue(account.hasEnoughBalance(new BigDecimal("300"), BalanceType.CASH));
+        assertTrue(account.hasEnoughBalance(new BigDecimal("500"), BalanceType.MEAL));
+        assertTrue(account.hasEnoughBalance(new BigDecimal("800"), BalanceType.FOOD));
 
-        assertFalse(account.hasEnoughBalance(new BigInteger("301"), BalanceType.CASH));
-        assertFalse(account.hasEnoughBalance(new BigInteger("501"), BalanceType.MEAL));
-        assertFalse(account.hasEnoughBalance(new BigInteger("801"), BalanceType.FOOD));
+        assertFalse(account.hasEnoughBalance(new BigDecimal("301"), BalanceType.CASH));
+        assertFalse(account.hasEnoughBalance(new BigDecimal("501"), BalanceType.MEAL));
+        assertFalse(account.hasEnoughBalance(new BigDecimal("801"), BalanceType.FOOD));
     }
 
     @Test

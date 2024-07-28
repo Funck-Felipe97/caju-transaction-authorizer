@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Builder
@@ -35,7 +35,7 @@ public class Transaction {
 
     @NotNull
     @Positive
-    private BigInteger totalAmount;
+    private BigDecimal totalAmount;
 
     private String mcc;
 
