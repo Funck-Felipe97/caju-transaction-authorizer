@@ -3,7 +3,6 @@ package com.funck.caju.transactionauthorizer.usecases.impl;
 import com.funck.caju.transactionauthorizer.domain.exceptions.NotEnoughBalanceException;
 import com.funck.caju.transactionauthorizer.domain.model.Account;
 import com.funck.caju.transactionauthorizer.domain.model.Balance;
-import com.funck.caju.transactionauthorizer.domain.model.BalanceType;
 import com.funck.caju.transactionauthorizer.domain.services.AccountService;
 import com.funck.caju.transactionauthorizer.domain.services.BalanceService;
 import com.funck.caju.transactionauthorizer.domain.services.MerchantService;
@@ -57,36 +56,22 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
 
         final var availableBalanceForMccCategory = availableBalanceForMccCategoryOptional.get();
 
+        // Try to debit from balance available for mcc type
         if (availableBalanceForMccCategory.hasEnoughBalance(transactionTotalAmount)) {
-            processApprovedTransaction(account, availableBalanceForMccCategory, transactionTotalAmount);
+            account.subtractBalanceFrom(transactionTotalAmount, availableBalanceForMccCategory);
+            saveAccountAndBalances(account, availableBalanceForMccCategory);
             return true;
         }
 
-        if (BalanceType.CASH.equals(availableBalanceForMccCategory.getBalanceType())) {
-            return false;
-        }
-
-        if (account.hasEnoughBalanceByTypeWithCash(transactionTotalAmount, availableBalanceForMccCategory.getBalanceType())) {
-            processApprovedTransactionWithCash(account, availableBalanceForMccCategory, transactionTotalAmount);
+        // Try to debit from account available balance taking cash into account
+        if (account.hasEnoughBalance(transactionTotalAmount, availableBalanceForMccCategory.getBalanceType())) {
+            final var cashBalance = account.getCashBalance().orElseThrow(() -> new NotEnoughBalanceException("Cash balance not found"));
+            account.subtractBalanceFrom(transactionTotalAmount, availableBalanceForMccCategory, cashBalance);
+            saveAccountAndBalances(account, availableBalanceForMccCategory, cashBalance);
             return true;
         }
 
         return false;
-    }
-
-    private void processApprovedTransaction(Account account, Balance balanceToBeDebited, BigInteger transactionTotalAmount) {
-        account.subtractBalanceFrom(transactionTotalAmount, balanceToBeDebited);
-
-        saveAccountAndBalances(account, balanceToBeDebited);
-    }
-
-    private void processApprovedTransactionWithCash(Account account, Balance balanceToBeDebited, BigInteger transactionTotalAmount) {
-        final var cashBalance = account.getCashBalance()
-                .orElseThrow(() -> new NotEnoughBalanceException("Cash balance not found"));
-
-        account.subtractBalanceFrom(transactionTotalAmount, balanceToBeDebited, cashBalance);
-
-        saveAccountAndBalances(account, balanceToBeDebited, cashBalance);
     }
 
     private void saveAccountAndBalances(Account account, Balance... balances) {

@@ -12,11 +12,21 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigInteger;
 
-@Data
+@Builder
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "account_balance")
 public class Balance {
@@ -48,13 +58,4 @@ public class Balance {
         return totalBalance.compareTo(totalAmount) >= 0;
     }
 
-    @Override
-    public String toString() {
-        return "Balance{" +
-                "id=" + id +
-                ", account=" + account +
-                ", balanceType=" + balanceType +
-                ", totalBalance=" + totalBalance +
-                '}';
-    }
 }

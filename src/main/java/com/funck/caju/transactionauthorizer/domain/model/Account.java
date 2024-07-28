@@ -9,7 +9,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -18,8 +22,12 @@ import java.util.Optional;
 
 import static com.funck.caju.transactionauthorizer.domain.model.BalanceType.CASH;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
 @Entity
-@Data
 public class Account {
 
     @Id
@@ -33,7 +41,7 @@ public class Account {
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<Balance> balances = new ArrayList<>();
 
-    public boolean hasEnoughBalanceByTypeWithCash(final BigInteger totalAmount, final BalanceType balanceType) {
+    public boolean hasEnoughBalance(final BigInteger totalAmount, final BalanceType balanceType) {
         final var balanceByType = balances.stream()
                 .filter(balance -> balance.getBalanceType().equals(balanceType) || CASH.equals(balance.getBalanceType()))
                 .map(Balance::getTotalBalance)
