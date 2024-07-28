@@ -29,7 +29,7 @@ public class TransactionAuthorizerLockProxy implements TransactionAuthorizerUseC
 
     @Override
     public TransactionResult execute(final ValidateTransactionCommand validateTransactionCommand) {
-        log.debug("Getting account lock to authorize transaction {}", validateTransactionCommand.account());
+        log.info("Getting account lock to authorize transaction {}", validateTransactionCommand.account());
 
         final var lock = lockRegistry.obtain(validateTransactionCommand.account().toString());
 

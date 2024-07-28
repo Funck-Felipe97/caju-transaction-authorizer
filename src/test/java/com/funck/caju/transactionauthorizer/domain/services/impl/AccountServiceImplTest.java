@@ -68,7 +68,7 @@ class AccountServiceImplTest {
         );
 
         // a
-        assertEquals("Account not found: 1", exception.getMessage());
+        assertEquals("Account not found with id: 1", exception.getMessage());
         verify(accountRepository, times(1)).findByIdWithBalances(1L);
     }
 
