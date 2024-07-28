@@ -12,11 +12,13 @@ import com.funck.caju.transactionauthorizer.usecases.model.ValidateTransactionCo
 import com.funck.caju.transactionauthorizer.usecases.model.TransactionResult;
 import com.funck.caju.transactionauthorizer.usecases.model.TransactionResponseType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCase {
@@ -29,14 +31,20 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
     @Override
     @Transactional
     public TransactionResult execute(final ValidateTransactionCommand validateTransactionCommand) {
+        log.info("Validating requested transaction: {}", validateTransactionCommand);
+
         final String mcc = getMcc(validateTransactionCommand);
         final var account = accountService.getAccountById(validateTransactionCommand.account());
 
         if (processTransaction(account, mcc, validateTransactionCommand.totalAmount())) {
             final var transaction = transactionService.save(validateTransactionCommand.toTransactionDomain());
 
+            log.info("Requested transaction approved {}", transaction);
+
             return new TransactionResult(TransactionResponseType.APPROVED, transaction);
         }
+
+        log.info("Requested transaction rejected...");
 
         return new TransactionResult(TransactionResponseType.REJECTED);
     }

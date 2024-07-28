@@ -1,6 +1,13 @@
 package com.funck.caju.transactionauthorizer.domain.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -41,4 +48,15 @@ public class Transaction {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id=" + id +
+                ", totalAmount=" + totalAmount +
+                ", mcc='" + mcc + '\'' +
+                ", merchant='" + merchant + '\'' +
+                ", createdAt=" + createdAt +
+                ", account=" + (account != null ? account.getId() : "") +
+                '}';
+    }
 }

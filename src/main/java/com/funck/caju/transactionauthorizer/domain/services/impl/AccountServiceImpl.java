@@ -22,7 +22,11 @@ public class AccountServiceImpl implements AccountService {
     public Account getAccountById(Long id) {
         log.info("Finding account by id: {}", id);
 
-        return accountRepository.findByIdWithBalances(id).orElseThrow(() -> new AccountNotFoundException(String.format("Account not found: %d", id)));
+        return accountRepository.findByIdWithBalances(id).orElseThrow(() -> {
+            log.error("Account not found with id: {}", id);
+
+            return new AccountNotFoundException(String.format("Account not found with id: %d", id));
+        });
     }
 
     @Override
