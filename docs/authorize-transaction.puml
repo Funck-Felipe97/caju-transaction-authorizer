@@ -1,0 +1,91 @@
+@startuml
+actor User
+participant "Controller" as TC
+participant "TransactionAuthorizerLockProxy" as TALP
+participant "TransactionAuthorizer" as TAUC
+participant "Merchant" as MS
+participant "Account" as AS
+participant "Balance" as BS
+participant "Transaction" as TS
+database "PostgreSQL Database" as DB
+
+User -> TC: POST /v1/transactions
+activate TC
+
+TC -> TALP: execute(validateTransactionCommand)
+activate TALP
+
+TALP -> DB: 1 - Obtem lock para Account Id
+activate DB
+DB --> TALP
+deactivate DB
+
+TALP --> TAUC: execute(validateTransactionCommand)
+activate TAUC
+
+TAUC -> MS: 2 - Consulta merchant MCC pelo name
+activate MS
+MS -> DB: 2.1 - Consulta merchant pelo merchant name
+
+activate DB
+DB --> MS: Merchant
+deactivate DB
+
+MS --> TAUC: MCC
+deactivate MS
+
+TAUC -> AS: 3 - Consulta Account por Id
+activate AS
+AS -> DB: 3.1 - Consulta Account por Id
+activate DB
+DB --> AS: Account
+deactivate DB
+AS --> TAUC: Account
+deactivate AS
+
+TAUC -> BS: 4 - Valida saldo da categoria do MCC
+activate BS
+BS --> TAUC
+deactivate BS
+
+TAUC -> AS: 5 - Se necessário valida saldo considerando CASH
+activate AS
+AS --> TAUC
+deactivate AS
+
+
+TAUC -> AS: 6 - Atualiza saldo da Account
+activate AS
+AS -> DB: 6.1 - Atualiza Account
+activate DB
+DB --> AS
+deactivate DB
+deactivate AS
+
+TAUC -> BS: 7 - Atualiza saldo das categorias alteradas
+activate BS
+BS -> DB: 7.1 - Atualiza Balance
+activate DB
+DB --> BS
+deactivate DB
+deactivate BS
+
+TAUC -> TS: 8 - Salva registro de transação
+activate TS
+TS -> DB: 8.1 - Salva transação
+activate DB
+DB --> TS
+deactivate DB
+TS --> TAUC: Transação
+deactivate TS
+
+TAUC --> TALP: Transação realizada
+TALP -> DB: 9 - Libera lock para Account Id
+TALP --> TC: Transação realizada
+
+deactivate TAUC
+deactivate TALP
+
+TC --> User: Response (code: "00")
+deactivate TC
+@enduml
