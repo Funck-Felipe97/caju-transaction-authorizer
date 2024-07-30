@@ -30,12 +30,35 @@ create table if not exists merchant (
 );
 
 
-
 -- Schema to use lock with postgres sql
-CREATE TABLE INT_LOCK  (
+CREATE TABLE if not exists INT_LOCK  (
 	LOCK_KEY CHAR(36) NOT NULL,
 	REGION VARCHAR(100) NOT NULL,
 	CLIENT_ID CHAR(36),
 	CREATED_DATE TIMESTAMP NOT NULL,
 	constraint INT_LOCK_PK primary key (LOCK_KEY, REGION)
 );
+
+
+-- Inserting data test
+insert into account(id, total_balance) select '1', 1000.00;
+insert into account_balance (id, account_id, balance_type, total_balance) select 1, '1', 'CASH', 300.00;
+insert into account_balance (id, account_id, balance_type, total_balance) select 2, '1', 'MEAL', 200.00;
+insert into account_balance (id, account_id, balance_type, total_balance) select 3, '1', 'FOOD', 500.00;
+
+insert into account(id, total_balance) select '2', 2000.00;
+insert into account_balance (id, account_id, balance_type, total_balance) select 4, '2', 'FOOD', 2000.00;
+
+insert into account(id, total_balance) select '3', 1500.00;
+insert into account_balance (id, account_id, balance_type, total_balance) select 5, '3', 'CASH', 1000.00;
+insert into account_balance (id, account_id, balance_type, total_balance) select 6, '3', 'FOOD', 500.00;
+
+
+insert into merchant(id, mcc, name) select 1, '5411', 'TESTE MERCHANT FOOD 01';
+insert into merchant(id, mcc, name) select 2, '5412', 'TESTE MERCHANT FOOD 02';
+
+insert into merchant(id, mcc, name) select 3, '5811', 'TESTE MERCHANT MEAL 01';
+insert into merchant(id, mcc, name) select 4, '5812', 'TESTE MERCHANT MEAL 02';
+
+insert into merchant(id, mcc, name) select 5, '3333', 'TESTE MERCHANT CASH 01';
+insert into merchant(id, mcc, name) select 6, '2222', 'TESTE MERCHANT CASH 02';

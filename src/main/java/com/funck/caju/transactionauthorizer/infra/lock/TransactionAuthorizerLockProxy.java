@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @Primary
-@Profile("!dev")
+@Profile("prod")
 public class TransactionAuthorizerLockProxy implements TransactionAuthorizerUseCase {
 
     private final TransactionAuthorizerUseCase transactionAuthorizerUseCase;
