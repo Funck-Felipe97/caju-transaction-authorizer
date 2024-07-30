@@ -7,18 +7,13 @@ import java.math.BigDecimal;
 
 public record ValidateTransactionCommand(String account, BigDecimal totalAmount, String mcc, String merchant) {
 
-    public Transaction toTransactionDomain() {
-        final var transaction = new Transaction();
-
-        final var account = new Account();
-        account.setId(this.account);
-
-        transaction.setAccount(account);
-        transaction.setMcc(mcc);
-        transaction.setMerchant(merchant);
-        transaction.setTotalAmount(totalAmount);
-
-        return transaction;
+    public Transaction toTransactionDomain(final Account account, final String mcc) {
+        return Transaction.builder()
+                .account(account)
+                .mcc(mcc)
+                .merchant(merchant)
+                .totalAmount(totalAmount)
+                .build();
     }
 
 }

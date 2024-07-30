@@ -37,7 +37,7 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
         final var account = accountService.getAccountById(validateTransactionCommand.account());
 
         if (processTransaction(account, mcc, validateTransactionCommand.totalAmount())) {
-            final var transaction = transactionService.save(validateTransactionCommand.toTransactionDomain());
+            final var transaction = transactionService.save(validateTransactionCommand.toTransactionDomain(account, mcc));
 
             log.info("Requested transaction approved {}", transaction);
 
@@ -62,7 +62,7 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
             return false;
         }
 
-        final var availableBalanceForMccCategory = availableBalanceForMccCategoryOptional.get();
+        final Balance availableBalanceForMccCategory = availableBalanceForMccCategoryOptional.get();
 
         // Try to debit from balance available for mcc type
         if (availableBalanceForMccCategory.hasEnoughBalance(transactionTotalAmount)) {

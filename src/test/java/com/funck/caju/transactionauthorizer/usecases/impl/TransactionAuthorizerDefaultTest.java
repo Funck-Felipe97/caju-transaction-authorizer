@@ -1,10 +1,7 @@
 package com.funck.caju.transactionauthorizer.usecases.impl;
 
 
-import com.funck.caju.transactionauthorizer.domain.model.Account;
-import com.funck.caju.transactionauthorizer.domain.model.Balance;
-import com.funck.caju.transactionauthorizer.domain.model.BalanceType;
-import com.funck.caju.transactionauthorizer.domain.model.Transaction;
+import com.funck.caju.transactionauthorizer.domain.model.*;
 import com.funck.caju.transactionauthorizer.domain.services.AccountService;
 import com.funck.caju.transactionauthorizer.domain.services.BalanceService;
 import com.funck.caju.transactionauthorizer.domain.services.MerchantService;
@@ -14,6 +11,7 @@ import com.funck.caju.transactionauthorizer.usecases.model.ValidateTransactionCo
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -23,10 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 class TransactionAuthorizerDefaultTest {
@@ -199,6 +194,36 @@ class TransactionAuthorizerDefaultTest {
         verify(balanceService, times(1)).save(foodBalance);
         verify(transactionService, times(1)).save(any(Transaction.class));
         verifyNoMoreInteractions(balanceService, accountService, transactionService);
+    }
+
+    @Test
+    @DisplayName("Should use balance for merchant name saved on database when present")
+    void testUseBalanceCategoryForMerchantName() {
+        /*
+         * MCC INPUT                = MEAL
+         * MCC MERCHANT NAME        = FOOD
+         */
+
+        // a
+        validateTransactionCommand = new ValidateTransactionCommand(
+                "1234", BigDecimal.valueOf(50), "5811", "MERCHANT FOOD CATEGORY"
+        );
+
+        doReturn(Optional.of("5412")).when(merchantService).getMccByMerchantName("MERCHANT FOOD CATEGORY");
+        doAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]).when(transactionService).save(any(Transaction.class));
+
+        // a
+        final var transactionResult = transactionAuthorizerDefault.execute(validateTransactionCommand);
+
+        // a
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+
+        verify(transactionService, times(1)).save(captor.capture());
+        verify(balanceService, times(1)).save(foodBalance);
+        verifyNoMoreInteractions(balanceService);
+
+        assertEquals("5412", transactionResult.transaction().getMcc());
+        assertEquals(transactionResult.transaction(), captor.getValue());
     }
 
 }
