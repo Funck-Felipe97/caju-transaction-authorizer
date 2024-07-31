@@ -39,6 +39,7 @@ API responsável por autorizar transaçôes de cartâo de crédito.
 - Funciona da seguinte forma: Ao receber uma transação para uma Account, antes do controller redirecionar a operação para um UseCase a transação vai passar por um proxy 
 deste UseCase. Este proxy vai pegar o código da Account, tentar obter um Lock para ela, caso o Lock seja obtido a transação seguirá. Se alguma outra transação concorrente neste mesmo período tentar fazer uma transação para a mesma Account, ela não vai conseguir obter o Lock e prosseguir com a transação, ela vai ter que esperar a primeira transação finalizar e liberar o Lock para que ela possa prosseguir, evitando assim que duas transações aconteçam ao mesmo tempo para a mesma account.
 - Como o Lock é realizado de forma externa com o Postgres isto também funciona para um cenário distribuido, onde esta aplicação é escalada de forma horizontal e tenha mais de uma instância em execução.
+- Obs: O proxy com lock está sendo usado somente com o `spring.profiles.active=prod`
 - O diagrama abaixo (Simplificado) ilustra como uma transação é executada (Cenário Feliz) utilizando o Lock com Postegres;
 
 ![Diagrama de sequência](./docs/authorize-transaction.png)
