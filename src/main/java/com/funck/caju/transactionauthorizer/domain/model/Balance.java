@@ -12,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,6 +44,8 @@ public class Balance {
     @Enumerated(EnumType.STRING)
     private BalanceType balanceType;
 
+    @NotNull
+    @PositiveOrZero
     private BigDecimal totalBalance;
 
     public void subtract(final BigDecimal totalAmount) {

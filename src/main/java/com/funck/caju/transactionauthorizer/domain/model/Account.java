@@ -3,12 +3,10 @@ package com.funck.caju.transactionauthorizer.domain.model;
 import com.funck.caju.transactionauthorizer.domain.exceptions.NotEnoughBalanceException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,7 +32,7 @@ public class Account {
     private String id;
 
     @NotNull
-    @Positive
+    @PositiveOrZero
     private BigDecimal totalBalance;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
