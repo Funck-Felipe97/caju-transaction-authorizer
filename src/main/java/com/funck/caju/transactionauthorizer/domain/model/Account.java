@@ -40,7 +40,7 @@ public class Account {
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<Balance> balances = new ArrayList<>();
 
-    public boolean hasEnoughBalance(final BigDecimal totalAmount, final BalanceType balanceType) {
+    public boolean hasEnoughBalanceWihCash(final BigDecimal totalAmount, final BalanceType balanceType) {
         final var balanceByType = balances.stream()
                 .filter(balance -> balance.getBalanceType().equals(balanceType) || CASH.equals(balance.getBalanceType()))
                 .map(Balance::getTotalBalance)

@@ -133,13 +133,13 @@ class AccountTest {
     @Test
     @DisplayName("should return true if account has enough balance for transaction amount")
     void testHasEnoughBalance() {
-        assertTrue(account.hasEnoughBalance(new BigDecimal("300"), BalanceType.CASH));
-        assertTrue(account.hasEnoughBalance(new BigDecimal("500"), BalanceType.MEAL));
-        assertTrue(account.hasEnoughBalance(new BigDecimal("800"), BalanceType.FOOD));
+        assertTrue(account.hasEnoughBalanceWihCash(new BigDecimal("300"), BalanceType.CASH));
+        assertTrue(account.hasEnoughBalanceWihCash(new BigDecimal("500"), BalanceType.MEAL));
+        assertTrue(account.hasEnoughBalanceWihCash(new BigDecimal("800"), BalanceType.FOOD));
 
-        assertFalse(account.hasEnoughBalance(new BigDecimal("301"), BalanceType.CASH));
-        assertFalse(account.hasEnoughBalance(new BigDecimal("501"), BalanceType.MEAL));
-        assertFalse(account.hasEnoughBalance(new BigDecimal("801"), BalanceType.FOOD));
+        assertFalse(account.hasEnoughBalanceWihCash(new BigDecimal("301"), BalanceType.CASH));
+        assertFalse(account.hasEnoughBalanceWihCash(new BigDecimal("501"), BalanceType.MEAL));
+        assertFalse(account.hasEnoughBalanceWihCash(new BigDecimal("801"), BalanceType.FOOD));
     }
 
     @Test

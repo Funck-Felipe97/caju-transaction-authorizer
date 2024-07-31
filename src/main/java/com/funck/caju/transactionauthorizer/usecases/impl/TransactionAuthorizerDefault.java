@@ -72,7 +72,7 @@ public class TransactionAuthorizerDefault implements TransactionAuthorizerUseCas
         }
 
         // Try to debit from account available balance taking cash into account
-        if (account.hasEnoughBalance(transactionTotalAmount, availableBalanceForMccCategory.getBalanceType())) {
+        if (account.hasEnoughBalanceWihCash(transactionTotalAmount, availableBalanceForMccCategory.getBalanceType())) {
             final var cashBalance = account.getCashBalance().orElseThrow(() -> new NotEnoughBalanceException("Cash balance not found"));
             account.subtractBalanceFrom(transactionTotalAmount, availableBalanceForMccCategory, cashBalance);
             saveAccountAndBalances(account, availableBalanceForMccCategory, cashBalance);
